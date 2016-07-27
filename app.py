@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 
 from collections import Counter
 import os
+import subprocess
 
 UPLOAD_FOLDER = '/home/ubuntu/App/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -51,6 +52,10 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
+@app.route('/show_result')
+def show_result():
+    return send_from_directory('/home/ubuntu/Deepstyle/neural-style/','out.png')
+
 @app.route('/countme/<input_str>')
 
 def count_me(input_str):
@@ -60,6 +65,20 @@ def count_me(input_str):
         response.append('"{}": {}'.format(letter, count))
     return '<br>'.join(response)
 
+
+def run_nn(style_image, original_image):
+
+    os.chdir('/home/ubuntu/Deepstyle/neural_style')
+
+    args = ['th',
+            'neural_style.lua',
+            '-style_image',
+            style_image,
+            '-content_image',
+            original_image,
+            ]
+    result = subprocess.check_output()
+    print(result)
 
 
 if __name__ == '__main__':
