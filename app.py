@@ -79,7 +79,7 @@ def print_data():
     except ValueError:
         return "Time must be an integer"
     station = request.args.get('station')
-    print minute_of_day
+    print(minute_of_day)
     day = request.args.get('day')
     dest = request.args.get('dest')
     result = execute_query(
@@ -117,7 +117,7 @@ def upload_file():
             #Do nn stuff...
             style_file = os.path.join('/home/ubuntu/Deepstyle/neural-style/examples/inputs', 'picasso_selfport1907.jpg')
             original_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-	        run_nn(style_file, original_file)
+            run_nn(style_file, original_file)
             outfile = 'out.png'
             return redirect(url_for('uploaded_file', filename=outfile))
 
