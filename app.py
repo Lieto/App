@@ -10,7 +10,7 @@ import logging
 
 UPLOAD_FOLDER = '/home/ubuntu/App/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-DATABASE = '/var/www/html/App/natpark.db'
+DATABASE = '/var/www/html/App/bart.db'
 
 #app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -44,9 +44,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 def run_nn(style_image, original_image):
-
     os.chdir('/home/ubuntu/Deepstyle/neural-style')
-
     args = ['th',
             'neural_style.lua',
             '-style_image',
@@ -55,7 +53,6 @@ def run_nn(style_image, original_image):
             original_image,
             ]
     result = subprocess.check_output(args)
-    print(result)
 
 @app.route("/viewdb")
 def viewdb():
