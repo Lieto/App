@@ -1,19 +1,45 @@
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, g
 from werkzeug.utils import secure_filename
 
 from collections import Counter
 import os
 import subprocess
+import sqlite3
 
 UPLOAD_FOLDER = '/home/ubuntu/App/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+DATABASE = '/var/www/html/app/natpark.db'
+
+#app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config.from_object(__name__)
+
+def connect_to_database():
+    return sqlite3.connect(app.config['DATABASE'])
+
+def get_db():
+    db = getattr(g, 'db', None)
+    if db is None:
+        db = g.db = connect_to_database()
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, 'db', None)
+
+    if db is not None:
+        db.close()
+
+def execute_query(query, args=()):
+    cur = get_db().execute(query, args)
+    rows = cur.fetchall()
+    cur.close()
+    return rows
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
-
 
 def run_nn(style_image, original_image):
 
@@ -28,6 +54,12 @@ def run_nn(style_image, original_image):
             ]
     result = subprocess.check_output(args)
     print(result)
+
+@app.route("/viewdb")
+def viewdb():
+    rows = execute_query("""SELECT * FROM natpark""")
+    return  '<br>'.join(str(row) for row in rows)
+
 
 @app.route('/')
 
