@@ -87,7 +87,7 @@ def print_data():
            FROM etd
            WHERE dest = ? AND minute_of_day = ?
                AND station = ? AND day_of_week = ?
-            GROUTP BY etd""",
+            GROUP BY etd""",
         (dest, minute_of_day, station, day)
     )
     str_rows = [','.join(map(str, row)) for row in result]
