@@ -14,6 +14,21 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
+
+def run_nn(style_image, original_image):
+
+    os.chdir('/home/ubuntu/Deepstyle/neural-style')
+
+    args = ['th',
+            'neural_style.lua',
+            '-style_image',
+            style_image,
+            '-content_image',
+            original_image,
+            ]
+    result = subprocess.check_output(args)
+    print(result)
+
 @app.route('/')
 
 def hello_world():
@@ -35,7 +50,13 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file', filename=filename))
+
+            #Do nn stuff...
+            style_file = os.path.join('/home/ubuntu/Deepstyle/neural-style/examples/inputs', 'picasso_selfport1907.jpg')
+            original_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+	    run_nn(style_file, original_file)
+            outfile = 'out.png'
+            return redirect(url_for('uploaded_file', filename=outfile))
 
     return '''
     <!doctype html>
@@ -49,12 +70,12 @@ def upload_file():
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
+    return send_from_directory('/home/ubuntu/Deepstyle/neural-style',
                                filename)
 
 @app.route('/show_result')
 def show_result():
-    return send_from_directory('/home/ubuntu/Deepstyle/neural-style/','out.png')
+    return send_from_directory(app.config['UPLOAD_FOLDER'],'out.png')
 
 @app.route('/countme/<input_str>')
 
@@ -66,21 +87,6 @@ def count_me(input_str):
     return '<br>'.join(response)
 
 
-def run_nn(style_image, original_image):
-
-    os.chdir('/home/ubuntu/Deepstyle/neural_style')
-
-    args = ['th',
-            'neural_style.lua',
-            '-style_image',
-            style_image,
-            '-content_image',
-            original_image,
-            ]
-    result = subprocess.check_output()
-    print(result)
-
-
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
