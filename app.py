@@ -8,7 +8,7 @@ import sqlite3
 
 UPLOAD_FOLDER = '/home/ubuntu/App/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-DATABASE = '/var/www/html/app/natpark.db'
+DATABASE = '/var/www/html/App/natpark.db'
 
 #app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
