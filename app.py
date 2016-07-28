@@ -5,6 +5,8 @@ from collections import Counter
 import os
 import subprocess
 import sqlite3
+import time
+import logging
 
 UPLOAD_FOLDER = '/home/ubuntu/App/uploads'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -67,9 +69,36 @@ def sortby(state):
 
 
 @app.route('/')
-
 def hello_world():
     return render_template('hello.html')
+
+@app.route("/print_data/")
+def print_data():
+
+    start_time = time.time()
+    cur = get_db().cursor()
+    try:
+        minute_of_day = int(request.args.get('time'))
+    except ValueError:
+        return "Time must be an integer"
+    station = request.args.get('station')
+    print minute_of_day
+    day = request.args.get('day')
+    dest = request.args.get('dest')
+    result = execute_query(
+        """SELECT etd, count(*)
+           FROM etd
+           WHERE dest = ? AND minute_of_day = ?
+               AND station = ? AND day_of_week = ?
+            GROUTP BY etd""",
+        (dest, minute_of_day, station, day)
+    )
+    str_rows = [','.join(map(str, row)) for row in result]
+    query_time = time.time() - start_time
+    logging.info("executed query in %s" % query_time)
+    cur.close()
+    header = 'etd,count\n'
+    return header + '\n'.join(str_rows)
 
 @app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
@@ -91,7 +120,7 @@ def upload_file():
             #Do nn stuff...
             style_file = os.path.join('/home/ubuntu/Deepstyle/neural-style/examples/inputs', 'picasso_selfport1907.jpg')
             original_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-	    run_nn(style_file, original_file)
+	        run_nn(style_file, original_file)
             outfile = 'out.png'
             return redirect(url_for('uploaded_file', filename=outfile))
 
