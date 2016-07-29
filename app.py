@@ -43,7 +43,7 @@ def execute_query(query, args=()):
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
-def run_nn(style_image, original_image):
+def run_nn(style_image, original_image, output_image):
     os.chdir('/home/ubuntu/Deepstyle/neural-style')
     args = ['th',
             'neural_style.lua',
@@ -51,6 +51,8 @@ def run_nn(style_image, original_image):
             style_image,
             '-content_image',
             original_image,
+            '-output_image',
+            output_image
             ]
     result = subprocess.check_output(args)
 
@@ -117,8 +119,9 @@ def upload_file():
             #Do nn stuff...
             style_file = os.path.join('/home/ubuntu/Deepstyle/neural-style/examples/inputs', 'picasso_selfport1907.jpg')
             original_file = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            run_nn(style_file, original_file)
-            outfile = 'out.png'
+            output_file = os.path.join('/home/ubuntu/App/uploads', 'test.jpg')
+            run_nn(style_file, original_file, output_file)
+            outfile = 'test.jpg'
             return redirect(url_for('uploaded_file', filename=outfile))
 
     return '''
@@ -133,7 +136,7 @@ def upload_file():
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory('/home/ubuntu/Deepstyle/neural-style',
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
 @app.route('/show_result')

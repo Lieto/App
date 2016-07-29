@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 
 DATABASE = 'bart.db'
-FILES = ['plza.csv', 'mont.csv']
+#FILES = ['plza.csv', 'mont.csv']
+FILES = ['plza.csv']
 
 def parse_time(timestamp):
 
@@ -39,13 +40,11 @@ def csv2sql(conn, files):
         df = parse_data(sta_file)
         df['station'] = sta_file.split('.')[0]
         df['day_of_week'] = df['time'].apply(lambda x: define_weekday(x))
-        df['etd'] = df['etd'].replade('Leaving', 0).dropna().astype(np.int)
+        df['etd'] = df['etd'].replace('Leaving', 0).dropna().astype(np.int)
         df['minute_of_day'] = df['time'].apply(time2minute_of_day)
         df[output_cols].to_sql('etd', conn, index=False, if_exists='append')
 
-    conn.cursor().execute(
-
-    )
+    conn.cursor().execute("""CREATE INDEX idx1 ON etd(station, dest, minute_of_day, day_of_week)""")
     conn.commit()
     conn.close()
 
